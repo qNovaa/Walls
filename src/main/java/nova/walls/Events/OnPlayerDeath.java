@@ -59,11 +59,19 @@ public class OnPlayerDeath implements Listener {
                         1 :
                         deathCountToDropChange(deathCounters.get(player.getUniqueId()));
 
+        RespawnAnchor anchor = gameController.getRespawnAnchorOfTeam(gameController.getTeamOfPlayer(player));
+        // if you had the respawn anchor when you died
+        if (player == anchor.getPlayerHoldingRespawnAnchor()) {
+            // drop the respawn anchor
+            anchor.dropRespawnAnchor(player.getLocation());
+            player.getInventory().remove(Material.RESPAWN_ANCHOR);
+        }
+
         // get list of different materials in inventory
         Inventory inv = player.getInventory();
         ArrayList<Material> differentItems = new ArrayList<>();
         for (int i = 0; i < inv.getSize(); i++) {
-            if (inv.getItem(i) != null) {
+            if (inv.getItem(i) != null && inv.getItem(i).getType() != Material.RESPAWN_ANCHOR) {
                 if (!differentItems.contains(inv.getItem(i).getType())) {
                     differentItems.add(inv.getItem(i).getType());
                 }
@@ -90,7 +98,6 @@ public class OnPlayerDeath implements Listener {
             player.sendRichMessage("<red>You dropped " + dropChance * 100 + "% of your items. Next time, you will drop " + deathCountToDropChange(deathCounters.get(player.getUniqueId()) + 1) * 100 + "% of your items.");
 
         // add to respawn queue
-        RespawnAnchor anchor = gameController.getRespawnAnchorOfTeam(gameController.getTeamOfPlayer(player));
         anchor.addToRespawnQueue(player.getUniqueId());
 
         // if player anchor is destroyed, display message

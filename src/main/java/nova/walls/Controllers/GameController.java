@@ -303,6 +303,8 @@ public class GameController {
     public void stop() {
         status = Status.FINISH;
         if (wall != null && wall.isWallCreated()) wall.restoreWall();
+        team1Anchor = null;
+        team2Anchor = null;
     }
 
     public void loadScoreboard() {
@@ -335,6 +337,7 @@ public class GameController {
         scoreboardComponents.add(Component.text(""));
         scoreboardComponents.add(Component.text("Blue Team").color(NamedTextColor.AQUA).decorate(TextDecoration.BOLD));
         for (Player player : getPlayersOfTeam(team2)) {
+            if (player == null) continue;
             Component component = player.displayName().color(isDead(player) ? NamedTextColor.GRAY : NamedTextColor.AQUA);
             if (isDead(player) && team2Anchor.isDestroyed()) {
                 component = component.decorate(TextDecoration.STRIKETHROUGH);

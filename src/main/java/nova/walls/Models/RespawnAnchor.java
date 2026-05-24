@@ -55,18 +55,23 @@ public class RespawnAnchor {
         Walls.world.dropItemNaturally(location, item);
     }
 
+    // returns the player holding the respawn anchor, or null if no one is holding it
+    public Player getPlayerHoldingRespawnAnchor() {
+        for (UUID uuid : Walls.gameController.getPlayersInGame()) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null && player.getInventory().contains(item)) return player;
+        }
+        return null;
+    }
+
     // return true is successful, false if otherwise
     public boolean teleportToAnchor(Player player) {
         // if block isn't placed, check if someone is holding it
         if (block == null) {
-            for (UUID targetPlayerUUID : Walls.gameController.getPlayersInGame()) {
-                Player targetPlayer = Bukkit.getPlayer(targetPlayerUUID);
-                Inventory inv = targetPlayer.getInventory();
-                // if it is found in someone's inventory, teleport to that person
-                if (inv.contains(item)) {
-                    player.teleport(targetPlayer);
-                    return true;
-                }
+            Player targetPlayer = getPlayerHoldingRespawnAnchor();
+            if (targetPlayer != null) {
+                player.teleport(targetPlayer);
+                return true;
             }
 
             // Check all dropped items in the world
@@ -137,14 +142,8 @@ public class RespawnAnchor {
             // check if respawn anchor is destroyed
             if (!destroyed) {
                 if (block == null) {
-                    for (UUID targetPlayerUUID : Walls.gameController.getPlayersInGame()) {
-                        Player targetPlayer = Bukkit.getPlayer(targetPlayerUUID);
-                        if (targetPlayer == null) continue;
-                        Inventory inv = targetPlayer.getInventory();
-                        // if it is found in someone's inventory, teleport to that person
-                        if (inv.contains(item)) {
-                            return;
-                        }
+                    if (getPlayerHoldingRespawnAnchor() != null) {
+                        return;
                     }
 
                     // Check all dropped items in the world
@@ -158,7 +157,7 @@ public class RespawnAnchor {
                         }
                     }
 
-                    // if it isn't found, no teleport
+                    // if it isn't found, set to destroyed
                     destroyed = true;
                     Bukkit.getServer().sendRichMessage("<red>[Walls] " + (team == 1 ? "Red" : "Blue") + " team's respawn anchor was destroyed!");
                     cancelSecondTimer();
