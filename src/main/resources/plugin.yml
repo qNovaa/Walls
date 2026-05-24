@@ -1,0 +1,5 @@
+name: Walls
+version: '1'
+main: nova.walls.Walls
+api-version: '1.21'
+authors: [ Nova ]
